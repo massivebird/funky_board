@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::{
     collections::HashSet,
     fmt::Display,
@@ -7,13 +8,13 @@ use std::{
 use MoveType::{Random, Adjacent};
 use rand::Rng;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 enum MoveType {
     Random,
     Adjacent,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 struct Token {
     symbol: char,
     move_type: MoveType,
@@ -36,20 +37,41 @@ impl Display for Token {
     }
 }
 
+impl std::hash::Hash for Token {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.symbol.hash(state);
+    }
+}
+
 #[derive(Debug)]
 struct Board {
-    board: Vec<Vec<Option<Rc<Token>>>>,
+    token_positions: HashMap<Rc<Token>, (usize, usize)>,
     width: usize,
     height: usize,
 }
 
 impl Board {
-    fn new(width: usize, height: usize) -> Self {
+    fn new(width: usize, height: usize, tokens: &Vec<Rc<Token>>) -> Self {
+        let mut token_positions = HashMap::new();
+
+        for token in tokens {
+            token_positions.insert(Rc::clone(&token), (0,0));
+        }
+
         Self {
-            board: vec![vec![None; width]; height],
+            token_positions,
             width,
             height,
         }       
+    }
+
+    fn try_get_active_token_at(&self, target_row: usize, target_col: usize) -> Option<Rc<Token>> {
+        for (token, (row, col)) in self.token_positions.iter() {
+            if token.is_active() && (*row, *col) == (target_row, target_col) {
+                return Some(Rc::clone(token))
+            }
+        }
+        None
     }
 }
 
@@ -58,11 +80,9 @@ impl Display for Board {
         let mut output = String::new();
         for row in 0..self.height {
             for col in 0..self.width {
-                unsafe {
-                    match self.board.get_unchecked(row).get_unchecked(col) {
-                        Some(token) => output.push(token.symbol),
-                        None => output.push('.'),
-                    }
+                match self.try_get_active_token_at(row, col) {
+                    Some(token) => output.push(token.symbol),
+                    None => output.push('.'),
                 }
             }
             output.push('\n')
@@ -75,13 +95,13 @@ fn main() {
     const HEIGHT: usize = 4;
     const WIDTH : usize = 8;
 
-    let mut board = Board::new(8, 4);
-
-    let mut tokens = vec![
+    let tokens = vec![
         Rc::new(Token::new('@', Random)),
         Rc::new(Token::new('&', Random)),
         Rc::new(Token::new('$', Adjacent)),
     ];
+
+    let mut board = Board::new(8, 4, &tokens);
 
     let mut rng = rand::thread_rng();
 
@@ -89,27 +109,48 @@ fn main() {
         // generate unique coordinate pairs
         let mut init_positions: HashSet::<(usize, usize)> = HashSet::new();
         while init_positions.len() < tokens.len() {
-            init_positions.insert((rng.gen_range(0..WIDTH), rng.gen_range(0..HEIGHT)));
+            init_positions.insert((rng.gen_range(0..HEIGHT), rng.gen_range(0..WIDTH)));
         }
 
+        dbg!(&init_positions);
+
         // place those tokens !
-        for (i, (col, row)) in init_positions.iter().enumerate() {
-            unsafe {
-                let token = Rc::clone(tokens.get_unchecked(i));
-                *board.board.get_unchecked_mut(*row).get_unchecked_mut(*col) = Some(token);
-            }
+        for (i, (row, col)) in init_positions.iter().enumerate() {
+            let token = Rc::clone(tokens.get(i).unwrap());
+            println!("Tried to place {token} at row {row} col {col}");
+            board.token_positions.entry(token).and_modify(|p| *p = (*row, *col));
         }
     }
 
     print!("Starting game!\n{board}");
 
-    let mut token_queue = tokens.iter();
-
     let capture = |t: &Rc<Token>| *t.active.borrow_mut() = false;
 
+    let mut token_queue = tokens.iter().cycle();
+
     while tokens.iter().filter(|t| t.is_active()).count() > 1 {
-        let this_token = token_queue.next().unwrap();
-        capture(this_token);
+        let this_token = loop {
+            let token = token_queue.next().unwrap();
+            if token.is_active() { break token }
+        };
+
+        let (current_row, current_col) = board.token_positions.get(&Rc::clone(&this_token)).unwrap().to_owned();
+        println!("{this_token} is moving.");
+
+        // TODO: consider MoveType
+        let (target_row, target_col) = loop {
+            let (row, col) = (rng.gen_range(0..HEIGHT), rng.gen_range(0..WIDTH));
+            if (row, col) != (current_row, current_col) { break (row, col) }
+        };
+
+        if let Some(other_token) = board.try_get_active_token_at(target_row, target_col) {
+            capture(&other_token);
+            println!("{other_token} has been captured!");
+        }
+
+        board.token_positions.entry(Rc::clone(this_token)).and_modify(|p| *p = (target_row, target_col));
+
+        print!("{board}");
     }
 
     let winning_token = tokens.iter().find(|t| t.is_active()).unwrap();
