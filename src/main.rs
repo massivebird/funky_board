@@ -1,5 +1,8 @@
-use std::collections::HashSet;
-use std::rc::Rc;
+use std::{
+    collections::HashSet,
+    fmt::Display,
+    rc::Rc
+};
 use MoveType::{Random, Adjacent};
 use rand::Rng;
 
@@ -22,7 +25,7 @@ impl Token {
     }
 }
 
-impl std::fmt::Display for Token {
+impl Display for Token {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", self.symbol)
     }
@@ -45,13 +48,23 @@ impl Board {
     }
 }
 
-// impl std::fmt::Display for Board {
-//     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-//         let mut output = String::new();
-//         for 
-//         write!(f, "{output}")
-//     }
-// }
+impl Display for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let mut output = String::new();
+        for row in 0..self.height {
+            for col in 0..self.width {
+                unsafe {
+                    match self.board.get_unchecked(row).get_unchecked(col) {
+                        Some(token) => output.push(token.symbol),
+                        None => output.push('.'),
+                    }
+                }
+            }
+            output.push('\n')
+        }
+        write!(f, "{output}")
+    }
+}
 
 fn main() {
     const HEIGHT: usize = 4;
@@ -82,15 +95,5 @@ fn main() {
         }
     }
 
-    for row in 0..HEIGHT {
-        for col in 0..WIDTH {
-            unsafe {
-                match board.board.get_unchecked(row).get_unchecked(col) {
-                    Some(token) => print!("{}", token.symbol),
-                    None => print!("."),
-                }
-            }
-        }
-        println!("")
-    }
+    print!("{board}");
 }
