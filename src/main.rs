@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::{
     collections::HashSet,
     fmt::Display,
@@ -16,12 +17,16 @@ enum MoveType {
 struct Token {
     symbol: char,
     move_type: MoveType,
-    active: bool,
+    active: RefCell<bool>,
 }
 
 impl Token {
     fn new(symbol: char, move_type: MoveType) -> Self {
-        Self { move_type, symbol, active: true }
+        Self { move_type, symbol, active: RefCell::new(true) }
+    }
+
+    fn is_active(&self) -> bool {
+        *self.active.borrow()
     }
 }
 
@@ -70,7 +75,7 @@ fn main() {
     const HEIGHT: usize = 4;
     const WIDTH : usize = 8;
 
-    let mut board = Board::new(WIDTH, HEIGHT);
+    let mut board = Board::new(8, 4);
 
     let mut tokens = vec![
         Rc::new(Token::new('@', Random)),
@@ -81,12 +86,13 @@ fn main() {
     let mut rng = rand::thread_rng();
 
     {
-        // place pieces randomly
+        // generate unique coordinate pairs
         let mut init_positions: HashSet::<(usize, usize)> = HashSet::new();
         while init_positions.len() < tokens.len() {
             init_positions.insert((rng.gen_range(0..WIDTH), rng.gen_range(0..HEIGHT)));
         }
 
+        // place those tokens !
         for (i, (col, row)) in init_positions.iter().enumerate() {
             unsafe {
                 let token = Rc::clone(tokens.get_unchecked(i));
@@ -95,5 +101,17 @@ fn main() {
         }
     }
 
-    print!("{board}");
+    print!("Starting game!\n{board}");
+
+    let mut token_queue = tokens.iter();
+
+    let capture = |t: &Rc<Token>| *t.active.borrow_mut() = false;
+
+    while tokens.iter().filter(|t| t.is_active()).count() > 1 {
+        let this_token = token_queue.next().unwrap();
+        capture(this_token);
+    }
+
+    let winning_token = tokens.iter().find(|t| t.is_active()).unwrap();
+    println!("{winning_token} wins!");
 }
