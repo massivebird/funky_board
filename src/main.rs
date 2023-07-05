@@ -1,6 +1,7 @@
-use std::cell::RefCell;
-use std::collections::HashMap;
 use std::{
+    cell::RefCell,
+    cmp::{min, max},
+    collections::HashMap,
     collections::HashSet,
     fmt::Display,
     rc::Rc
@@ -126,6 +127,10 @@ fn main() {
 
     let capture = |t: &Rc<Token>| *t.active.borrow_mut() = false;
 
+    let bounded_subtract = |x: usize| max(1, x) - 1;
+    let bounded_add_row  = |x: usize| min(HEIGHT - 1, x) + 1;
+    let bounded_add_col  = |x: usize| min(WIDTH - 1 , x) + 1;
+
     let mut token_queue = tokens.iter().cycle();
 
     while tokens.iter().filter(|t| t.is_active()).count() > 1 {
@@ -137,9 +142,22 @@ fn main() {
         let (current_row, current_col) = board.token_positions.get(&Rc::clone(&this_token)).unwrap().to_owned();
         println!("{this_token} is moving.");
 
-        // TODO: consider MoveType
         let (target_row, target_col) = loop {
-            let (row, col) = (rng.gen_range(0..HEIGHT), rng.gen_range(0..WIDTH));
+            let (row, col) = match this_token.move_type {
+                Random => (rng.gen_range(0..HEIGHT), rng.gen_range(0..WIDTH)),
+                Adjacent => match rng.gen_range(1..=4) {
+                    // up
+                    1 => (bounded_subtract(current_row), current_col),
+                    // right
+                    2 => (current_row, bounded_add_col(current_col)),
+                    // down
+                    3 => (bounded_add_row(current_row), current_col),
+                    // left
+                    4 => (current_row, bounded_subtract(current_col)),
+                    _ => unreachable!(),
+                }
+            };
+
             if (row, col) != (current_row, current_col) { break (row, col) }
         };
 
