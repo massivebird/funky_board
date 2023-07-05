@@ -46,18 +46,20 @@ impl std::hash::Hash for Token {
 
 #[derive(Debug)]
 struct Board {
-    token_positions: HashMap<Rc<Token>, (usize, usize)>,
+    token_positions: HashMap<Rc<Token>, RefCell<(usize, usize)>>,
     width: usize,
     height: usize,
 }
 
 impl Board {
     fn new(width: usize, height: usize, tokens: &Vec<Rc<Token>>) -> Self {
-        let mut token_positions = HashMap::new();
-
-        for token in tokens {
-            token_positions.insert(Rc::clone(&token), (0,0));
-        }
+        let token_positions = {
+            let mut temp_map: HashMap<Rc<Token>, RefCell<(usize, usize)>> = HashMap::new();
+            for token in tokens {
+                temp_map.insert(Rc::clone(token), RefCell::new((0,0)));
+            }
+            temp_map
+        };
 
         Self {
             token_positions,
@@ -67,8 +69,9 @@ impl Board {
     }
 
     fn try_get_active_token_at(&self, target_row: usize, target_col: usize) -> Option<Rc<Token>> {
-        for (token, (row, col)) in self.token_positions.iter() {
-            if token.is_active() && (*row, *col) == (target_row, target_col) {
+        for (token, pos) in &self.token_positions {
+            let (row, col) = (pos.borrow().0, pos.borrow().1);
+            if token.is_active() && (row, col) == (target_row, target_col) {
                 return Some(Rc::clone(token))
             }
         }
@@ -86,7 +89,7 @@ impl Display for Board {
                     None => output.push('.'),
                 }
             }
-            output.push('\n')
+            output.push('\n');
         }
         write!(f, "{output}")
     }
@@ -119,7 +122,7 @@ fn main() {
         for (i, (row, col)) in init_positions.iter().enumerate() {
             let token = Rc::clone(tokens.get(i).unwrap());
             println!("Tried to place {token} at row {row} col {col}");
-            board.token_positions.entry(token).and_modify(|p| *p = (*row, *col));
+            board.token_positions.entry(token).and_modify(|p| *p.borrow_mut() = (*row, *col));
         }
     }
 
@@ -139,7 +142,8 @@ fn main() {
             if token.is_active() { break token }
         };
 
-        let (current_row, current_col) = board.token_positions.get(&Rc::clone(&this_token)).unwrap().to_owned();
+        let pos = board.token_positions.get(&Rc::clone(this_token)).unwrap().clone();
+        let (current_row, current_col) = (pos.borrow().0, pos.borrow().1);
         println!("{this_token} is moving.");
 
         let (target_row, target_col) = loop {
@@ -166,7 +170,7 @@ fn main() {
             println!("{other_token} has been captured!");
         }
 
-        board.token_positions.entry(Rc::clone(this_token)).and_modify(|p| *p = (target_row, target_col));
+        board.token_positions.entry(Rc::clone(this_token)).and_modify(|p| *p.borrow_mut() = (target_row, target_col));
 
         print!("{board}");
     }
