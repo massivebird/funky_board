@@ -103,6 +103,7 @@ fn main() {
         Rc::new(Token::new('@', Random)),
         Rc::new(Token::new('&', Random)),
         Rc::new(Token::new('$', Adjacent)),
+        Rc::new(Token::new('#', Adjacent)),
     ];
 
     let mut board = Board::new(8, 4, &tokens);
@@ -115,8 +116,6 @@ fn main() {
         while init_positions.len() < tokens.len() {
             init_positions.insert((rng.gen_range(0..HEIGHT), rng.gen_range(0..WIDTH)));
         }
-
-        dbg!(&init_positions);
 
         // place those tokens !
         for (i, (row, col)) in init_positions.iter().enumerate() {
