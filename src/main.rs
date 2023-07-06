@@ -137,8 +137,7 @@ fn main() {
 
     while tokens.iter().filter(|t| t.is_active()).count() > 1 {
         let this_token = loop {
-            let token = token_queue.next().unwrap();
-            if token.is_active() { break token }
+            if let Some(token) = token_queue.next().filter(|t| t.is_active()) { break token }
         };
 
         let pos = board.token_positions.get(&Rc::clone(this_token)).unwrap().clone();
@@ -169,7 +168,9 @@ fn main() {
             println!("{other_token} has been captured!");
         }
 
-        board.token_positions.entry(Rc::clone(this_token)).and_modify(|p| *p.borrow_mut() = (target_row, target_col));
+        // update this token's position
+        board.token_positions.entry(Rc::clone(this_token))
+            .and_modify(|p| *p.borrow_mut() = (target_row, target_col));
 
         print!("{board}");
     }
