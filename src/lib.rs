@@ -50,7 +50,7 @@ pub fn run(tokens: &[Rc<Token>]) {
 
         let pos = board.token_positions.get(&Rc::clone(this_token)).unwrap().clone();
         let (current_row, current_col) = (pos.borrow().0, pos.borrow().1);
-        println!("{this_token} is moving.");
+        this_token.display_move_msg();
 
         let (target_row, target_col) = loop {
             let (row, col) = match this_token.move_type {

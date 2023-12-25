@@ -22,6 +22,15 @@ impl Token {
     pub fn is_active(&self) -> bool {
         *self.active.borrow()
     }
+
+    pub fn display_move_msg(&self) {
+        let adverb = match self.move_type {
+            MoveType::Random => "randomly",
+            MoveType::Adjacent => "adjacently"
+        };
+        let symbol = self.symbol;
+        println!("{symbol} is moving {adverb}.");
+    }
 }
 
 impl Display for Token {
