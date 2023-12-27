@@ -1,5 +1,4 @@
 use std::cell::RefCell;
-use std::fmt::Display;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum MoveType {
@@ -15,7 +14,7 @@ pub struct Token {
 }
 
 impl Token {
-    pub fn new(symbol: char, move_type: MoveType) -> Self {
+    pub const fn new(symbol: char, move_type: MoveType) -> Self {
         Self { move_type, symbol, active: RefCell::new(true) }
     }
 
@@ -23,17 +22,16 @@ impl Token {
         *self.active.borrow()
     }
 
-    pub fn display_move_msg(&self) {
+    pub fn print_move_msg(&self) {
         let adverb = match self.move_type {
             MoveType::Random => "randomly",
             MoveType::Adjacent => "adjacently"
         };
-        let symbol = self.symbol;
-        println!("{symbol} is moving {adverb}.");
+        println!("{self} is moving {adverb}.");
     }
 }
 
-impl Display for Token {
+impl std::fmt::Display for Token {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", self.symbol)
     }

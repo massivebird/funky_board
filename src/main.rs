@@ -4,9 +4,6 @@ use funky_board::{
     token::{Token, MoveType::{Random, Adjacent}}
 };
 
-mod token;
-mod board;
-
 fn main() {
     let tokens = vec![
         Rc::new(Token::new('@', Random)),

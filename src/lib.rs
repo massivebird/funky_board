@@ -14,7 +14,7 @@ pub fn run(tokens: &[Rc<Token>]) {
     const HEIGHT: usize = 4;
     const WIDTH : usize = 8;
 
-    let mut board = Board::new(8, 4, &tokens);
+    let mut board = Board::new(8, 4, tokens);
 
     let mut rng = rand::thread_rng();
 
@@ -43,14 +43,15 @@ pub fn run(tokens: &[Rc<Token>]) {
 
     let mut token_queue = tokens.iter().cycle();
 
-    while tokens.iter().filter(|t| t.is_active()).count() > 1 {
+    let the_battle_is_yet_won = || tokens.iter().filter(|t| t.is_active()).count() > 1;
+    while the_battle_is_yet_won() {
         let this_token = loop {
             if let Some(token) = token_queue.next().filter(|t| t.is_active()) { break token }
         };
 
         let pos = board.token_positions.get(&Rc::clone(this_token)).unwrap().clone();
         let (current_row, current_col) = (pos.borrow().0, pos.borrow().1);
-        this_token.display_move_msg();
+        this_token.print_move_msg();
 
         let (target_row, target_col) = loop {
             let (row, col) = match this_token.move_type {
@@ -68,6 +69,7 @@ pub fn run(tokens: &[Rc<Token>]) {
                 }
             };
 
+            // loop again if trying to move out of bounds
             if (row, col) != (current_row, current_col) { break (row, col) }
         };
 
