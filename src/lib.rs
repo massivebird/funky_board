@@ -38,15 +38,17 @@ pub fn run(tokens: &[Rc<Token>]) {
     let capture = |t: &Rc<Token>| *t.active.borrow_mut() = false;
 
     let bounded_subtract = |x: usize| max(1, x) - 1;
-    let bounded_add_row  = |x: usize| min(HEIGHT - 1, x) + 1;
-    let bounded_add_col  = |x: usize| min(WIDTH - 1 , x) + 1;
+    let bounded_add_row  = |x: usize| min(HEIGHT - 2, x) + 1;
+    let bounded_add_col  = |x: usize| min(WIDTH - 2, x) + 1;
 
     let mut token_queue = tokens.iter().cycle();
 
     let the_battle_is_yet_won = || tokens.iter().filter(|t| t.is_active()).count() > 1;
     while the_battle_is_yet_won() {
         let this_token = loop {
-            if let Some(token) = token_queue.next().filter(|t| t.is_active()) { break token }
+            if let Some(alive_token) = token_queue.next().filter(|t| t.is_active()) {
+                break alive_token
+            }
         };
 
         let pos = board.token_positions.get(&Rc::clone(this_token)).unwrap().clone();
