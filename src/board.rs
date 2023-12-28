@@ -46,7 +46,7 @@ impl Display for Board {
         for row in 0..self.height {
             for col in 0..self.width {
                 match self.try_get_active_token_at(row, col) {
-                    Some(token) => output.push(token.symbol),
+                    Some(token) => output.push_str(&token.to_string()),
                     None => output.push('.'),
                 }
             }
