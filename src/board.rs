@@ -38,6 +38,22 @@ impl Board {
         }
         None
     }
+
+    pub fn try_capture_and_print_if_capturing(&self, target_row: usize, target_col: usize) {
+        if let Some(token) = self.try_get_active_token_at(target_row, target_col) {
+            *token.active.borrow_mut() = false;
+            println!("{token} has been captured!");
+        }
+    }
+
+    pub fn get_row_col(&self, token: &Rc<Token>) -> (usize, usize) {
+        self.token_positions.get(&Rc::clone(token)).unwrap().clone().take()
+    }
+
+    pub fn update_position(&mut self, this_token: &Rc<Token>, target_row: usize, target_col: usize) {
+        self.token_positions.entry(Rc::clone(this_token))
+            .and_modify(|p| *p.borrow_mut() = (target_row, target_col));
+    }
 }
 
 impl Display for Board {
