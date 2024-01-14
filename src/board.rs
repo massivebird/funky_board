@@ -29,19 +29,28 @@ impl Board {
         }       
     }
 
-    pub fn try_get_active_token_at(&self, target_row: usize, target_col: usize) -> Option<Rc<Token>> {
+    pub fn try_get_alive_token_at(
+        &self,
+        target_row: usize,
+        target_col: usize
+    ) -> Option<Rc<Token>>
+    {
         for (token, pos) in &self.token_positions {
             let (row, col) = (pos.borrow().0, pos.borrow().1);
-            if token.is_active() && (row, col) == (target_row, target_col) {
+            if token.is_alive() && (row, col) == (target_row, target_col) {
                 return Some(Rc::clone(token))
             }
         }
         None
     }
 
-    pub fn try_capture_and_print_if_capturing(&self, target_row: usize, target_col: usize) {
-        if let Some(token) = self.try_get_active_token_at(target_row, target_col) {
-            *token.active.borrow_mut() = false;
+    pub fn try_kill_and_print_if_killing(
+        &self,
+        target_row: usize,
+        target_col: usize
+    ) {
+        if let Some(token) = self.try_get_alive_token_at(target_row, target_col) {
+            token.kill();
             println!("{token} has been captured!");
         }
     }
@@ -50,7 +59,12 @@ impl Board {
         self.token_positions.get(&Rc::clone(token)).unwrap().clone().take()
     }
 
-    pub fn update_position(&mut self, this_token: &Rc<Token>, target_row: usize, target_col: usize) {
+    pub fn update_position(
+        &mut self,
+        this_token: &Rc<Token>,
+        target_row: usize,
+        target_col: usize
+    ) {
         self.token_positions.entry(Rc::clone(this_token))
             .and_modify(|p| *p.borrow_mut() = (target_row, target_col));
     }
@@ -61,7 +75,7 @@ impl Display for Board {
         let mut output = String::new();
         for row in 0..self.height {
             for col in 0..self.width {
-                match self.try_get_active_token_at(row, col) {
+                match self.try_get_alive_token_at(row, col) {
                     Some(token) => output.push_str(&token.to_string()),
                     None => output.push('.'),
                 }

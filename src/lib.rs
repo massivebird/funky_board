@@ -37,13 +37,13 @@ pub fn run(tokens: &[Rc<Token>]) {
 
     let mut next_alive_token = || -> &Rc<Token> {
         loop {
-            if let Some(alive_token) = token_queue.next().filter(|t| t.is_active()) {
+            if let Some(alive_token) = token_queue.next().filter(|t| t.is_alive()) {
                 break alive_token
             }
         }
     };
 
-    let the_battle_is_not_yet_won = || tokens.iter().filter(|t| t.is_active()).count() > 1;
+    let the_battle_is_not_yet_won = || tokens.iter().filter(|t| t.is_alive()).count() > 1;
 
     while the_battle_is_not_yet_won() {
         let this_token = next_alive_token();
@@ -59,13 +59,13 @@ pub fn run(tokens: &[Rc<Token>]) {
 
         this_token.print_move_msg();
 
-        board.try_capture_and_print_if_capturing(target_row, target_col);
+        board.try_kill_and_print_if_killing(target_row, target_col);
 
         board.update_position(this_token, target_row, target_col);
 
         print!("{board}");
     }
 
-    let winning_token = tokens.iter().find(|t| t.is_active()).unwrap();
+    let winning_token = tokens.iter().find(|t| t.is_alive()).unwrap();
     println!("{winning_token} wins!");
 }

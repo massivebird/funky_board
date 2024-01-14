@@ -25,22 +25,31 @@ pub enum Color {
 pub struct Token {
     pub symbol: char,
     pub move_type: MoveType,
-    pub active: RefCell<bool>,
+    is_alive: RefCell<bool>,
     pub color: Color,
 }
 
 impl Token {
-    pub const fn new(symbol: char, move_type: MoveType, color: Color) -> Self {
+    pub const fn new(
+        symbol: char,
+        move_type: MoveType,
+        color: Color
+    ) -> Self
+    {
         Self {
             move_type,
             symbol,
-            active: RefCell::new(true),
+            is_alive: RefCell::new(true),
             color,
         }
     }
 
-    pub fn is_active(&self) -> bool {
-        *self.active.borrow()
+    pub fn is_alive(&self) -> bool {
+        *self.is_alive.borrow()
+    }
+
+    pub fn kill(&self) {
+        *self.is_alive.borrow_mut() = false;
     }
 
     pub fn print_move_msg(&self) {
@@ -51,14 +60,23 @@ impl Token {
         println!("{self} is moving {adverb}.");
     }
 
-    pub fn generate_target_coords(&self, board: &Board, current_row: usize, current_col: usize, rng: &mut ThreadRng) -> (usize, usize) {
+    pub fn generate_target_coords(
+        &self,
+        board: &Board,
+        current_row: usize,
+        current_col: usize,
+        rng: &mut ThreadRng
+    ) -> (usize, usize)
+    {
         let bounded_subtract = |x: usize| max(1, x) - 1;
         let bounded_add_row  = |x: usize| min(board.height - 2, x) + 1;
         let bounded_add_col  = |x: usize| min(board.width - 2, x) + 1;
 
         loop {
             let (row, col) = match &self.move_type {
-                MoveType::Random => (rng.gen_range(0..board.height), rng.gen_range(0..board.width)),
+                MoveType::Random => {
+                    (rng.gen_range(0..board.height), rng.gen_range(0..board.width))
+                },
                 MoveType::Adjacent => match rng.gen_range(1..=4) {
                     // up
                     1 => (bounded_subtract(current_row), current_col),
