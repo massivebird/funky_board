@@ -33,8 +33,6 @@ pub fn run(tokens: &[Rc<Token>]) {
         }
     }
 
-    print!("Starting game!\n{board}");
-
     let mut token_queue = tokens.iter().cycle();
 
     let mut next_alive_token = || -> &Rc<Token> {
@@ -45,9 +43,15 @@ pub fn run(tokens: &[Rc<Token>]) {
         }
     };
 
-    let the_battle_is_not_yet_won = || tokens.iter().any(|t| t.is_alive());
+    print!("Starting game!\n{board}");
 
-    while the_battle_is_not_yet_won() {
+    let the_heated_battle_rages_on = || tokens
+        .iter()
+        .filter(|t| t.is_alive())
+        .count()
+        .gt(&1);
+
+    while the_heated_battle_rages_on() {
         let this_token = next_alive_token();
 
         let (current_row, current_col) = board.get_row_col(this_token);
