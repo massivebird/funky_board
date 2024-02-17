@@ -37,13 +37,17 @@ impl Board {
         target_col: usize
     ) -> Option<Rc<Token>>
     {
-        for (token, pos) in &self.token_positions {
-            let (row, col) = (pos.borrow().0, pos.borrow().1);
-            if token.is_alive() && (row, col) == (target_row, target_col) {
-                return Some(Rc::clone(token))
-            }
-        }
-        None
+        let is_here = |row: usize, col: usize| {
+            row == target_row && col == target_col
+        };
+
+        self.token_positions
+            .iter()
+            .find(|(token, coords)| {
+                let (row, col) = (coords.borrow().0, coords.borrow().1);
+                is_here(row, col) && token.is_alive()
+            })
+            .map(|(token, _)| Rc::clone(token))
     }
 
     pub fn try_kill_and_print_if_killing(
