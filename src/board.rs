@@ -14,8 +14,10 @@ pub struct Board {
 
 impl Board {
     pub fn new(width: usize, height: usize, tokens: &[Rc<Token>]) -> Self {
+        // first thing we'll do later is update these positions to match
+        // each token's auto-generated initial position
         let token_positions = {
-            let mut temp_map: HashMap<Rc<Token>, RefCell<(usize, usize)>> = HashMap::new();
+            let mut temp_map = HashMap::new();
             for token in tokens {
                 temp_map.insert(Rc::clone(token), RefCell::new((0,0)));
             }
@@ -29,7 +31,7 @@ impl Board {
         }       
     }
 
-    pub fn try_get_alive_token_at(
+    pub fn try_get_alive_token(
         &self,
         target_row: usize,
         target_col: usize
@@ -49,7 +51,7 @@ impl Board {
         target_row: usize,
         target_col: usize
     ) {
-        if let Some(token) = self.try_get_alive_token_at(target_row, target_col) {
+        if let Some(token) = self.try_get_alive_token(target_row, target_col) {
             token.kill();
             println!("{token} has been captured!");
         }
@@ -75,7 +77,7 @@ impl Display for Board {
         let mut output = String::new();
         for row in 0..self.height {
             for col in 0..self.width {
-                match self.try_get_alive_token_at(row, col) {
+                match self.try_get_alive_token(row, col) {
                     Some(token) => output.push_str(&token.to_string()),
                     None => output.push('.'),
                 }

@@ -27,7 +27,9 @@ pub fn run(tokens: &[Rc<Token>]) {
         // place those tokens !
         for (i, (row, col)) in init_positions.iter().enumerate() {
             let token = Rc::clone(tokens.get(i).unwrap());
-            board.token_positions.entry(token).and_modify(|p| *p.borrow_mut() = (*row, *col));
+            board.token_positions
+                .entry(token)
+                .and_modify(|p| *p.borrow_mut() = (*row, *col));
         }
     }
 
@@ -37,13 +39,13 @@ pub fn run(tokens: &[Rc<Token>]) {
 
     let mut next_alive_token = || -> &Rc<Token> {
         loop {
-            if let Some(alive_token) = token_queue.next().filter(|t| t.is_alive()) {
-                break alive_token
-            }
+            if let Some(alive_token) = token_queue
+                .next()
+                .filter(|t| t.is_alive()) { break alive_token }
         }
     };
 
-    let the_battle_is_not_yet_won = || tokens.iter().filter(|t| t.is_alive()).count() > 1;
+    let the_battle_is_not_yet_won = || tokens.iter().any(|t| t.is_alive());
 
     while the_battle_is_not_yet_won() {
         let this_token = next_alive_token();

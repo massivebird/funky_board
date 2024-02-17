@@ -75,7 +75,10 @@ impl Token {
         loop {
             let (row, col) = match &self.move_type {
                 MoveType::Random => {
-                    (rng.gen_range(0..board.height), rng.gen_range(0..board.width))
+                    (
+                        rng.gen_range(0..board.height),
+                        rng.gen_range(0..board.width)
+                    )
                 },
                 MoveType::Adjacent => match rng.gen_range(1..=4) {
                     // up
