@@ -10,9 +10,6 @@ pub mod token;
 mod board;
 
 pub fn run(tokens: &[Rc<Token>]) {
-    const HEIGHT: usize = 4;
-    const WIDTH : usize = 8;
-
     let mut board = Board::new(8, 4, tokens);
 
     let mut rng = rand::thread_rng();
@@ -21,7 +18,10 @@ pub fn run(tokens: &[Rc<Token>]) {
         // generate unique coordinate pairs
         let mut init_positions: HashSet::<(usize, usize)> = HashSet::new();
         while init_positions.len() < tokens.len() {
-            init_positions.insert((rng.gen_range(0..HEIGHT), rng.gen_range(0..WIDTH)));
+            init_positions.insert((
+                rng.gen_range(0..board.height),
+                rng.gen_range(0..board.width)
+            ));
         }
 
         // place those tokens !
