@@ -1,14 +1,9 @@
 use funky_board::{
     run,
     token::{
+        Color::{Blue, Magenta, Red, Yellow},
+        MoveType::{Adjacent, Random},
         Token,
-        MoveType::{ Random, Adjacent },
-        Color::{
-            Red,
-            Blue,
-            Magenta,
-            Yellow,
-        }
     },
 };
 use std::rc::Rc;

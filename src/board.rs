@@ -19,7 +19,7 @@ impl Board {
         let token_positions = {
             let mut temp_map = HashMap::new();
             for token in tokens {
-                temp_map.insert(Rc::clone(token), RefCell::new((0,0)));
+                temp_map.insert(Rc::clone(token), RefCell::new((0, 0)));
             }
             temp_map
         };
@@ -28,18 +28,11 @@ impl Board {
             token_positions,
             width,
             height,
-        }       
+        }
     }
 
-    pub fn try_get_alive_token(
-        &self,
-        target_row: usize,
-        target_col: usize
-    ) -> Option<Rc<Token>>
-    {
-        let is_here = |row: usize, col: usize| {
-            row == target_row && col == target_col
-        };
+    pub fn try_get_alive_token(&self, target_row: usize, target_col: usize) -> Option<Rc<Token>> {
+        let is_here = |row: usize, col: usize| row == target_row && col == target_col;
 
         self.token_positions
             .iter()
@@ -50,11 +43,7 @@ impl Board {
             .map(|(token, _)| Rc::clone(token))
     }
 
-    pub fn try_kill_and_print_if_killing(
-        &self,
-        target_row: usize,
-        target_col: usize
-    ) {
+    pub fn try_kill_and_print_if_killing(&self, target_row: usize, target_col: usize) {
         if let Some(token) = self.try_get_alive_token(target_row, target_col) {
             token.kill();
             println!("{token} has been captured!");
@@ -62,16 +51,21 @@ impl Board {
     }
 
     pub fn get_row_col(&self, token: &Rc<Token>) -> (usize, usize) {
-        self.token_positions.get(&Rc::clone(token)).unwrap().clone().take()
+        self.token_positions
+            .get(&Rc::clone(token))
+            .unwrap()
+            .clone()
+            .take()
     }
 
     pub fn update_position(
         &mut self,
         this_token: &Rc<Token>,
         target_row: usize,
-        target_col: usize
+        target_col: usize,
     ) {
-        self.token_positions.entry(Rc::clone(this_token))
+        self.token_positions
+            .entry(Rc::clone(this_token))
             .and_modify(|p| *p.borrow_mut() = (target_row, target_col));
     }
 }

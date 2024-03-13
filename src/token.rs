@@ -1,6 +1,6 @@
 use colored::Colorize;
-use rand::Rng;
 use rand::rngs::ThreadRng;
+use rand::Rng;
 use std::cell::RefCell;
 use std::cmp::{max, min};
 
@@ -30,12 +30,7 @@ pub struct Token {
 }
 
 impl Token {
-    pub const fn new(
-        symbol: char,
-        move_type: MoveType,
-        color: Color
-    ) -> Self
-    {
+    pub const fn new(symbol: char, move_type: MoveType, color: Color) -> Self {
         Self {
             move_type,
             symbol,
@@ -55,7 +50,7 @@ impl Token {
     pub fn print_move_msg(&self) {
         let adverb = match self.move_type {
             MoveType::Random => "randomly",
-            MoveType::Adjacent => "adjacently"
+            MoveType::Adjacent => "adjacently",
         };
         println!("{self} is moving {adverb}.");
     }
@@ -65,21 +60,18 @@ impl Token {
         board: &Board,
         current_row: usize,
         current_col: usize,
-        rng: &mut ThreadRng
-    ) -> (usize, usize)
-    {
+        rng: &mut ThreadRng,
+    ) -> (usize, usize) {
         let bounded_subtract = |x: usize| max(1, x) - 1;
-        let bounded_add_row  = |x: usize| min(board.height - 2, x) + 1;
-        let bounded_add_col  = |x: usize| min(board.width - 2, x) + 1;
+        let bounded_add_row = |x: usize| min(board.height - 2, x) + 1;
+        let bounded_add_col = |x: usize| min(board.width - 2, x) + 1;
 
         loop {
             let (row, col) = match &self.move_type {
-                MoveType::Random => {
-                    (
-                        rng.gen_range(0..board.height),
-                        rng.gen_range(0..board.width)
-                    )
-                },
+                MoveType::Random => (
+                    rng.gen_range(0..board.height),
+                    rng.gen_range(0..board.width),
+                ),
                 MoveType::Adjacent => match rng.gen_range(1..=4) {
                     // up
                     1 => (bounded_subtract(current_row), current_col),
@@ -90,11 +82,13 @@ impl Token {
                     // left
                     4 => (current_row, bounded_subtract(current_col)),
                     _ => unreachable!(),
-                }
+                },
             };
 
             // loop again if trying to move out of bounds
-            if (row, col) != (current_row, current_col) { break (row, col) }
+            if (row, col) != (current_row, current_col) {
+                break (row, col);
+            }
         }
     }
 }
