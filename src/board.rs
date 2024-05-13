@@ -43,11 +43,8 @@ impl Board {
             .map(|(token, _)| Rc::clone(token))
     }
 
-    pub fn try_kill_and_print_if_killing(&self, target_row: usize, target_col: usize) {
-        if let Some(token) = self.try_get_alive_token(target_row, target_col) {
-            token.kill();
-            println!("{token} has been captured!");
-        }
+    pub fn get_token_at(&self, target_row: usize, target_col: usize) -> Option<Rc<Token>> {
+        self.try_get_alive_token(target_row, target_col)
     }
 
     pub fn get_row_col(&self, token: &Rc<Token>) -> (usize, usize) {

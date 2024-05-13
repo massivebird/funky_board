@@ -55,7 +55,10 @@ pub fn run(tokens: &[Rc<Token>]) {
 
         this_token.print_move_msg();
 
-        board.try_kill_and_print_if_killing(target_row, target_col);
+        if let Some(token_to_kill) = board.get_token_at(target_row, target_col) {
+            token_to_kill.kill();
+            println!("{token_to_kill} has been captured!");
+        }
 
         board.update_position(this_token, target_row, target_col);
 
