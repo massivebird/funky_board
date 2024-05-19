@@ -47,12 +47,8 @@ impl Board {
         self.try_get_alive_token(target_row, target_col)
     }
 
-    pub fn get_row_col(&self, token: &Rc<Token>) -> (usize, usize) {
-        self.token_positions
-            .get(&Rc::clone(token))
-            .unwrap()
-            .clone()
-            .take()
+    pub fn take_row_col(&self, token: &Rc<Token>) -> (usize, usize) {
+        self.token_positions.get(&Rc::clone(token)).unwrap().take()
     }
 
     pub fn update_position(
