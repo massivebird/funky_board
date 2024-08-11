@@ -49,7 +49,6 @@ pub fn run(tokens: &[Rc<Token>]) {
         let this_token = next_alive_token();
 
         let (current_row, current_col) = board.take_row_col(this_token);
-        dbg!(&board);
 
         let (target_row, target_col) =
             this_token.generate_target_coords(&board, current_row, current_col, &mut rng);
