@@ -63,10 +63,12 @@ fn main() {
 fn display_board(tokens: &[Token]) {
     for row in 0..BOARD_SIZE.row {
         for col in 0..BOARD_SIZE.col {
+            let here = Dimensions::new(row, col);
+
             if let Some(token) = tokens
                 .iter()
                 .filter(|t| t.is_alive())
-                .find(|t| t.pos.get().row == row && t.pos.get().col == col)
+                .find(|t| t.pos.get() == here)
             {
                 print!("{token}");
             } else {
