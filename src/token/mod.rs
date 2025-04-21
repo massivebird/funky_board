@@ -1,6 +1,9 @@
-use crate::{dimensions::Dimensions, move_type::MoveType};
+use self::move_type::MoveType;
+use crate::dimensions::Dimensions;
 use colored::{Color, Colorize};
 use std::cell::Cell;
+
+pub mod move_type;
 
 pub struct Token {
     pub symbol: char,

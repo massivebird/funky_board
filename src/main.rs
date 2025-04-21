@@ -1,12 +1,12 @@
 use self::{
     dimensions::{Dimensions, BOARD_SIZE},
     move_type::MoveType,
+    token::move_type,
 };
 use crate::token::Token;
 use colored::Color;
 
 mod dimensions;
-mod move_type;
 mod token;
 
 fn main() {
