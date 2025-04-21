@@ -52,7 +52,7 @@ fn main() {
 
         if let Some(kill_this_guy) = tokens
             .iter()
-            .filter(|other| other.symbol != this.symbol && other.is_alive())
+            .filter(|other| other.is_alive() && *other != this) // Cannot capture self
             .find(|other| other.pos.get() == new_pos)
         {
             println!("{kill_this_guy} has been captured!");

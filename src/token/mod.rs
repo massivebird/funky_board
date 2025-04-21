@@ -2,13 +2,20 @@ use self::move_type::MoveType;
 use crate::dimensions::Dimensions;
 use colored::Colorize;
 use std::cell::Cell;
+use std::sync::atomic::{AtomicU32, Ordering};
 
 pub mod move_type;
+
+// Used to generate unique token IDs.
+static ID_COUNTER: AtomicU32 = AtomicU32::new(0);
 
 pub struct Token {
     pub symbol: char,
     pub color: colored::Color,
     pub move_type: Box<dyn MoveType>,
+
+    // Unique token identifier.
+    id: u32,
 
     // These being Cells makes the game logic easier. Cycling through all
     // of the tokens in a loop prevents creation of mutable refs. There is
@@ -24,6 +31,9 @@ impl Token {
             color,
             is_alive: Cell::new(true),
             move_type: Box::new(move_type),
+
+            id: ID_COUNTER.fetch_add(1, Ordering::Relaxed),
+
             // Placeholder position until assigned a real position before the game.
             pos: Cell::new(Dimensions::new(0, 0)),
         }
@@ -41,6 +51,12 @@ impl Token {
 
     pub fn kill(&self) {
         self.is_alive.set(false);
+    }
+}
+
+impl PartialEq for Token {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
     }
 }
 
