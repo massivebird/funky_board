@@ -61,6 +61,10 @@ fn main() {
 
         display_board(&tokens);
     }
+
+    let winner = tokens.iter().find(|t| t.is_alive()).unwrap();
+
+    println!("{winner} is the winner!");
 }
 
 fn display_board(tokens: &[Token]) {
