@@ -18,15 +18,16 @@ fn main() {
     ];
 
     // Place all tokens in random, unique positions.
-    let mut taken: Vec<Dimensions> = Vec::new();
-
+    let mut occupied: Vec<Dimensions> = Vec::new();
     for token in &tokens {
         loop {
             let pos = move_type::Random.generate(None);
 
-            if !taken.iter().any(|&other| other == pos) {
+            if !occupied.iter().any(|&other| other == pos) {
                 token.pos.set(pos);
-                taken.push(pos);
+
+                occupied.push(pos);
+
                 break;
             }
         }
