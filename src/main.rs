@@ -14,7 +14,7 @@ fn main() {
         Token::new('@', move_type::Random, Color::Red),
         Token::new('&', move_type::Random, Color::Blue),
         Token::new('$', move_type::Adjacent, Color::Magenta),
-        Token::new('#', move_type::Random, Color::Yellow),
+        Token::new('#', move_type::Adjacent, Color::Yellow),
     ];
 
     // Place all tokens in random, unique positions.
