@@ -1,6 +1,6 @@
 use self::move_type::MoveType;
 use crate::dimensions::Dimensions;
-use colored::{Color, Colorize};
+use colored::Colorize;
 use std::cell::Cell;
 
 pub mod move_type;
@@ -18,17 +18,18 @@ pub struct Token {
 }
 
 impl Token {
-    pub fn new<T: MoveType + 'static>(symbol: char, move_type: T, color: Color) -> Self {
+    pub fn new<T: MoveType + 'static>(symbol: char, move_type: T, color: colored::Color) -> Self {
         Self {
             symbol,
-            move_type: Box::new(move_type),
             color,
             is_alive: Cell::new(true),
+            move_type: Box::new(move_type),
             // Placeholder position until assigned a real position before the game.
             pos: Cell::new(Dimensions::new(0, 0)),
         }
     }
 
+    /// Moves this token to a new position on the board.
     pub fn relocate(&self) {
         let new_pos = self.move_type.generate(Some(self.pos.get()));
         self.pos.set(new_pos);

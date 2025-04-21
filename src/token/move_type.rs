@@ -7,7 +7,7 @@ pub trait MoveType {
     fn descriptor(&self) -> String;
 }
 
-// Moves a token to a new, random position on the board.
+/// Moves a token to a new, random position on the board.
 pub struct Random;
 impl MoveType for Random {
     fn generate(&self, old_pos: Option<Dimensions>) -> Dimensions {

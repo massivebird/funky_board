@@ -38,7 +38,10 @@ fn main() {
 
     let mut turn_queue = tokens.iter().cycle().filter(|t| t.is_alive());
 
-    while tokens.iter().filter(|t| t.is_alive()).count() >= 2 {
+    // Game continues until only one token is alive.
+    let the_battle_rages_on = || tokens.iter().filter(|t| t.is_alive()).count() >= 2;
+
+    while the_battle_rages_on() {
         let this = turn_queue.next().unwrap();
 
         this.relocate();
