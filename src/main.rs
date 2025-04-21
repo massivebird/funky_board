@@ -44,11 +44,11 @@ fn main() {
     while the_battle_rages_on() {
         let this = turn_queue.next().unwrap();
 
+        println!("{this} is moving {}.", this.move_type.descriptor());
+
         this.relocate();
 
         let new_pos = this.pos.get();
-
-        println!("{this} is moving {}.", this.move_type.descriptor());
 
         if let Some(kill_this_guy) = tokens
             .iter()
