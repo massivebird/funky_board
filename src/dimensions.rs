@@ -11,4 +11,3 @@ impl Dimensions {
         Self { row, col }
     }
 }
-

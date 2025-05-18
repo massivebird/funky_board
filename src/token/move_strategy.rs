@@ -1,7 +1,7 @@
 use crate::dimensions::{Dimensions, BOARD_SIZE};
 use rand::Rng;
 
-pub trait MoveType {
+pub trait MoveStrategy {
     fn generate(&self, old_pos: Option<Dimensions>) -> Dimensions;
 
     fn descriptor(&self) -> String;
@@ -9,19 +9,19 @@ pub trait MoveType {
 
 /// Moves a token to a new, random position on the board.
 pub struct Random;
-impl MoveType for Random {
+impl MoveStrategy for Random {
     fn generate(&self, old_pos: Option<Dimensions>) -> Dimensions {
         let mut rng = rand::rng();
 
         loop {
-            let new_pos = Dimensions::new(
+            let dest = Dimensions::new(
                 rng.random_range(0..BOARD_SIZE.row),
                 rng.random_range(0..BOARD_SIZE.col),
             );
 
-            // Loop again if we generated the old position.
-            if old_pos.as_ref().is_none_or(|old_pos| *old_pos != new_pos) {
-                break new_pos;
+            // Loop again if the destination is the current position.
+            if old_pos.as_ref().is_none_or(|old_pos| *old_pos != dest) {
+                break dest;
             }
         }
     }
@@ -32,8 +32,13 @@ impl MoveType for Random {
 }
 
 /// Moves a token to some new, adjacent (orthogonal or diagonal) space.
+///
+/// # Panics
+///
+/// This move strategy requires an existing position, and will panic if this
+/// token does not provide one.
 pub struct Adjacent;
-impl MoveType for Adjacent {
+impl MoveStrategy for Adjacent {
     fn generate(&self, old_pos: Option<Dimensions>) -> Dimensions {
         // This move type requires an existing position.
         let old_pos = old_pos.unwrap();

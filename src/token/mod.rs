@@ -1,10 +1,12 @@
-use self::move_type::MoveType;
+use self::move_strategy::MoveStrategy;
 use crate::dimensions::Dimensions;
 use colored::Colorize;
-use std::cell::Cell;
-use std::sync::atomic::{AtomicU32, Ordering};
+use std::{
+    cell::Cell,
+    sync::atomic::{AtomicU32, Ordering},
+};
 
-pub mod move_type;
+pub mod move_strategy;
 
 // Used to generate unique token IDs.
 static ID_COUNTER: AtomicU32 = AtomicU32::new(0);
@@ -12,7 +14,7 @@ static ID_COUNTER: AtomicU32 = AtomicU32::new(0);
 pub struct Token {
     pub symbol: char,
     pub color: colored::Color,
-    pub move_type: Box<dyn MoveType>,
+    pub move_strategy: Box<dyn MoveStrategy>,
 
     // Unique token identifier.
     id: u32,
@@ -25,30 +27,35 @@ pub struct Token {
 }
 
 impl Token {
-    pub fn new<T: MoveType + 'static>(symbol: char, move_type: T, color: colored::Color) -> Self {
+    pub fn new<T: MoveStrategy + 'static>(
+        symbol: char,
+        move_strategy: T,
+        color: colored::Color,
+    ) -> Self {
         Self {
             symbol,
             color,
             is_alive: Cell::new(true),
-            move_type: Box::new(move_type),
+            move_strategy: Box::new(move_strategy),
 
             id: ID_COUNTER.fetch_add(1, Ordering::Relaxed),
 
-            // Placeholder position until assigned a real position before the game.
+            // Placeholder position until this token is placed on the board.
             pos: Cell::new(Dimensions::new(0, 0)),
         }
     }
 
     /// Moves this token to a new position on the board.
     pub fn relocate(&self) {
-        let new_pos = self.move_type.generate(Some(self.pos.get()));
-        self.pos.set(new_pos);
+        let dest = self.move_strategy.generate(Some(self.pos.get()));
+        self.pos.set(dest);
     }
 
     pub fn is_alive(&self) -> bool {
         self.is_alive.get()
     }
 
+    /// 25 to life
     pub fn kill(&self) {
         self.is_alive.set(false);
     }

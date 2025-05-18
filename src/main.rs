@@ -1,7 +1,6 @@
 use self::{
     dimensions::{Dimensions, BOARD_SIZE},
-    move_type::MoveType,
-    token::move_type,
+    token::move_strategy::{self, MoveStrategy},
 };
 use crate::token::Token;
 use colored::Color;
@@ -11,17 +10,17 @@ mod token;
 
 fn main() {
     let tokens = vec![
-        Token::new('@', move_type::Random, Color::Red),
-        Token::new('&', move_type::Random, Color::Blue),
-        Token::new('$', move_type::Adjacent, Color::Magenta),
-        Token::new('#', move_type::Adjacent, Color::Yellow),
+        Token::new('@', move_strategy::Random, Color::Red),
+        Token::new('&', move_strategy::Random, Color::Blue),
+        Token::new('$', move_strategy::Adjacent, Color::Magenta),
+        Token::new('#', move_strategy::Adjacent, Color::Yellow),
     ];
 
     // Place all tokens in random, unique positions.
     let mut occupied: Vec<Dimensions> = Vec::new();
     for token in &tokens {
         loop {
-            let pos = move_type::Random.generate(None);
+            let pos = move_strategy::Random.generate(None);
 
             if !occupied.iter().any(|&other| other == pos) {
                 token.pos.set(pos);
@@ -44,7 +43,7 @@ fn main() {
     while the_battle_rages_on() {
         let this = turn_queue.next().unwrap();
 
-        println!("{this} is moving {}.", this.move_type.descriptor());
+        println!("{this} is moving {}.", this.move_strategy.descriptor());
 
         this.relocate();
 
@@ -52,7 +51,7 @@ fn main() {
 
         if let Some(kill_this_guy) = tokens
             .iter()
-            .filter(|&other| other.is_alive() && other != this) // Cannot capture self
+            .filter(|&other| other != this && other.is_alive()) // Cannot capture self
             .find(|other| other.pos.get() == new_pos)
         {
             println!("{kill_this_guy} has been captured!");
@@ -72,6 +71,7 @@ fn display_board(tokens: &[Token]) {
         for col in 0..BOARD_SIZE.col {
             let here = Dimensions::new(row, col);
 
+            // If a token is sitting here, print it.
             if let Some(token) = tokens
                 .iter()
                 .filter(|t| t.is_alive())
